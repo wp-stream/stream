@@ -105,8 +105,10 @@ class Log {
 			}
 		);
 
-		// Add user meta to Stream meta.
-		$stream_meta['user_meta'] = $user_meta;
+		// Flatten and add user meta to Stream meta.
+		foreach ( $user_meta as $k => $v ) {
+			$stream_meta[ sprintf( 'user_meta[%s]', $k ) ] = $v;
+		}
 
 		if ( ! empty( $user->roles ) ) {
 			$roles = array_values( $user->roles );
