@@ -313,7 +313,7 @@ class List_Table extends \WP_List_Table {
 				);
 				$out         = $this->column_link( $date_string, 'date', get_date_from_gmt( $created, 'Y/m/d' ) );
 				$out        .= '<br />';
-				$out        .= get_date_from_gmt( $created, 'h:i:s A' );
+				$out        .= get_date_from_gmt( $created, 'h:i:s A T' );
 				break;
 
 			case 'summary':

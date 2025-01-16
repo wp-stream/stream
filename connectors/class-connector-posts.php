@@ -159,7 +159,13 @@ class Connector_Posts extends Connector {
 	 * @param \WP_Post $post       Post object.
 	 */
 	public function callback_transition_post_status( $new_status, $old_status, $post ) {
+
 		if ( in_array( $post->post_type, $this->get_excluded_post_types(), true ) ) {
+			return;
+		}
+
+		// We don't want the meta box update request, just the post update.
+		if ( ! empty( wp_stream_filter_input( INPUT_GET, 'meta-box-loader' ) ) ) {
 			return;
 		}
 

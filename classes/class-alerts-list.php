@@ -338,29 +338,10 @@ class Alerts_List {
 			return;
 		}
 
-		$min = wp_stream_min_suffix();
-
-		wp_register_script(
-			'wp-stream-alerts-list-js',
-			$this->plugin->locations['url'] . 'ui/js/alerts-list.' . $min . 'js',
-			array(
-				'wp-stream-alerts',
-				'jquery',
-			),
-			$this->plugin->get_version(),
-			false
+		$this->plugin->enqueue_asset(
+			'alerts-list',
+			array( 'wp-stream-alerts' )
 		);
-
-		wp_register_style(
-			'wp-stream-alerts-list-css',
-			$this->plugin->locations['url'] . 'ui/css/alerts-list.' . $min . 'css',
-			array(),
-			$this->plugin->get_version()
-		);
-
-		wp_enqueue_script( 'wp-stream-alerts-list-js' );
-		wp_enqueue_style( 'wp-stream-alerts-list-css' );
-		wp_enqueue_style( 'wp-stream-select2' );
 	}
 
 	/**
@@ -393,8 +374,8 @@ class Alerts_List {
 		$trigger_author                      = wp_stream_filter_input( INPUT_POST, 'wp_stream_trigger_author' );
 		$trigger_connector_and_context       = wp_stream_filter_input( INPUT_POST, 'wp_stream_trigger_connector_or_context' );
 		$trigger_connector_and_context_split = explode( '-', $trigger_connector_and_context );
-		$trigger_connector                   = $trigger_connector_and_context_split[0];
-		$trigger_context                     = $trigger_connector_and_context_split[1];
+		$trigger_connector                   = array_shift( $trigger_connector_and_context_split ) ?? '';
+		$trigger_context                     = array_shift( $trigger_connector_and_context_split ) ?? '';
 
 		$trigger_action      = wp_stream_filter_input( INPUT_POST, 'wp_stream_trigger_action' );
 		$alert_type          = wp_stream_filter_input( INPUT_POST, 'wp_stream_alert_type' );

@@ -832,6 +832,31 @@
 </details>
 
 
+## Connector: WP_Stream\Connector_Two_Factor
+
+### Actions
+
+	- update_user_meta
+	- updated_user_meta
+	- added_user_meta
+	- two_factor_user_authenticated
+	- wp_login_failed
+
+### Class register()
+
+<details>
+<summary>This is the register method for the Connector. Occasionally there are additional actions in here.</summary>
+
+```php
+	public function register() {
+		parent::register();
+
+		add_filter( 'wp_stream_log_data', array( $this, 'log_override' ) );
+	}
+```
+</details>
+
+
 ## Connector: WP_Stream\Connector_User_Switching
 
 ### Actions

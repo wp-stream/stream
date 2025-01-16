@@ -111,16 +111,20 @@ class Export {
 			switch ( $column_name ) {
 				case 'date':
 					$created                 = gmdate( 'Y-m-d H:i:s', strtotime( $record->created ) );
-					$row_out[ $column_name ] = get_date_from_gmt( $created, 'Y/m/d h:i:s A' );
+					$row_out[ $column_name ] = get_date_from_gmt( $created, 'Y/m/d h:i:s A T' );
 					break;
 
 				case 'summary':
 					$row_out[ $column_name ] = $record->summary;
 					break;
 
-				case 'user_id':
+				case 'user':
 					$user                    = new Author( (int) $record->user_id, (array) $record->user_meta );
 					$row_out[ $column_name ] = $user->get_display_name();
+					break;
+
+				case 'user_id':
+					$row_out[ $column_name ] = $record->user_id;
 					break;
 
 				case 'connector':
@@ -129,6 +133,10 @@ class Export {
 
 				case 'context':
 					$row_out[ $column_name ] = $record->context;
+					break;
+
+				case 'object_id':
+					$row_out[ $column_name ] = $record->object_id;
 					break;
 
 				case 'action':
@@ -154,7 +162,14 @@ class Export {
 	 * @return int
 	 */
 	public function disable_paginate() {
-		return 10000;
+
+		/**
+		 * Filter to change how many records are exported.
+		 * Increasing this too much could cause your export to time out.
+		 *
+		 * @return int The number of records to export.
+		 */
+		return apply_filters( 'wp_stream_export_limit', 10000 );
 	}
 
 	/**
@@ -167,9 +182,11 @@ class Export {
 		$new_columns = array(
 			'date'      => $columns['date'],
 			'summary'   => $columns['summary'],
-			'user_id'   => $columns['user_id'],
+			'user'      => $columns['user_id'],
+			'user_id'   => __( 'User ID', 'stream' ),
 			'connector' => __( 'Connector', 'stream' ),
 			'context'   => $columns['context'],
+			'object_id' => __( 'Object ID', 'stream' ),
 			'action'    => $columns['action'],
 			'ip'        => $columns['ip'],
 		);

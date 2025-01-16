@@ -38,12 +38,18 @@ class Exporter_CSV extends Exporter {
 			header( 'Content-Disposition: attachment; filename="stream.csv"' );
 		}
 
-		$output = join( ',', array_values( $columns ) ) . "\n";
-		foreach ( $data as $row ) {
-			$output .= join( ',', $row ) . "\n";
-		}
+		ob_start();
 
-		echo $output; // @codingStandardsIgnoreLine text-only output
+		$csv = fopen( 'php://output', 'w' );
+		fputcsv( $csv, array_values( $columns ) );
+
+		foreach ( $data as $row ) {
+			fputcsv( $csv, $row );
+		}
+		fclose( $csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+
+		echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
 		if ( ! defined( 'WP_STREAM_TESTS' ) || ( defined( 'WP_STREAM_TESTS' ) && ! WP_STREAM_TESTS ) ) {
 			exit;
 		}

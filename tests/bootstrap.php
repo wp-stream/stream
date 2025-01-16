@@ -119,4 +119,4 @@ if ( ! is_multisite() ) {
 require __DIR__ . '/testcase.php';
 
 // Base class for future tests
-require __DIR__ . '/tests/test-class-alert-trigger.php';
+require __DIR__ . '/phpunit/test-class-alert-trigger.php';

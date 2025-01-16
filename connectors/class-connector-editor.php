@@ -46,9 +46,8 @@ class Connector_Editor extends Connector {
 	 */
 	public function register() {
 		parent::register();
-		add_action( 'load-theme-editor.php', array( $this, 'get_edition_data' ) );
-		add_action( 'load-plugin-editor.php', array( $this, 'get_edition_data' ) );
-		add_filter( 'wp_redirect', array( $this, 'log_changes' ) );
+
+		add_action( 'wp_ajax_edit-theme-plugin-file', array( $this, 'get_edition_data' ), 1 );
 	}
 
 	/**
@@ -187,33 +186,50 @@ class Connector_Editor extends Connector {
 	}
 
 	/**
-	 * Retrieves data submitted on the screen, and prepares it for the appropriate context type
+	 * Retrieves data submitted on the screen, prepares it for the appropriate context type and logs the changes
 	 *
-	 * @action load-theme-editor.php
-	 * @action load-plugin-editor.php
+	 * @action wp_ajax_edit-theme-plugin-file
 	 */
 	public function get_edition_data() {
-		if (
-			(
-				isset( $_SERVER['REQUEST_METHOD'] )
-				&&
-				'POST' !== sanitize_text_field( $_SERVER['REQUEST_METHOD'] )
-			)
-			||
-			'update' !== wp_stream_filter_input( INPUT_POST, 'action' )
-		) {
+		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			return;
 		}
 
-		$theme_slug = wp_stream_filter_input( INPUT_POST, 'theme' );
+		$action         = wp_stream_filter_input( INPUT_POST, 'action' );
+		$request_method = wp_stream_filter_input( INPUT_SERVER, 'REQUEST_METHOD' );
+		$theme_slug     = wp_stream_filter_input( INPUT_POST, 'theme' );
+		$plugin_slug    = wp_stream_filter_input( INPUT_POST, 'plugin' );
+		$relative_file  = wp_stream_filter_input( INPUT_POST, 'file' );
+
+		if ( ! empty( $theme_slug ) && ! check_admin_referer( 'edit-theme_' . $theme_slug . '_' . $relative_file, 'nonce' ) ) {
+			return;
+		}
+
+		if ( ! empty( $plugin_slug ) && ! check_admin_referer( 'edit-plugin_' . $relative_file, 'nonce' ) ) {
+			return;
+		}
+
+		if ( ( isset( $request_method ) && 'POST' !== $request_method ) || ( 'edit-theme-plugin-file' !== $action ) ) {
+			return;
+		}
+
+		$location = null;
+
 		if ( $theme_slug ) {
+			$location          = 'theme-editor.php';
 			$this->edited_file = $this->get_theme_data( $theme_slug );
 		}
 
-		$plugin_slug = wp_stream_filter_input( INPUT_POST, 'plugin' );
 		if ( $plugin_slug ) {
+			$location          = 'plugin-editor.php';
 			$this->edited_file = $this->get_plugin_data( $plugin_slug );
 		}
+
+		if ( ! $location ) {
+			return;
+		}
+
+		$this->log_changes( $location );
 	}
 
 	/**
@@ -298,14 +314,11 @@ class Connector_Editor extends Connector {
 	/**
 	 * Logs changes
 	 *
-	 * @filter wp_redirect
-	 *
 	 * @param string $location Location.
 	 */
-	public function log_changes( $location ) {
+	public function log_changes( string $location ): string {
 		if ( ! empty( $this->edited_file ) ) {
-			// TODO: phpcs fix.
-			if ( md5_file( $this->edited_file['file_path'] ) !== $this->edited_file['file_md5'] ) {
+			if ( md5_file( $this->edited_file['file_path'] ) === $this->edited_file['file_md5'] ) {
 				$context = $this->get_context( $location );
 
 				switch ( $context ) {

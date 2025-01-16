@@ -4,14 +4,25 @@ services:
     image: mariadb:11.4.2
     volumes:
       - db_data:/var/lib/mysql
-    restart: always
     ports:
       - "3306:3306"
+    restart: always
     environment:
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: password
       MYSQL_ROOT_PASSWORD: password
+
+  phpmyadmin:
+    image: phpmyadmin:5.2.1
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: password
 
   wordpress:
     image: ghcr.io/xwp/stream-wordpress:${WORDPRESS_IMAGE_VERSION:-latest}
@@ -27,6 +38,7 @@ services:
       - .:/var/www/html/wp-content/plugins/stream-src # Working directory.
       - ./build:/var/www/html/wp-content/plugins/stream # Built version for testing.
       - ./local/public:/var/www/html # WP core files.
+      - ./local/scripts:/var/local/scripts # Let us access the scripts in the container.
     restart: always
     extra_hosts:
       - host.docker.internal:host-gateway

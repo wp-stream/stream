@@ -14,10 +14,11 @@ debug.log
 package.lock
 .phpunit.result.cache
 
-# Compiled files
-ui/js/*.min.js
-ui/css/*.min.css
-alerts/js/*.min.js
-
 # Generated test data
+/artifacts/
 tests/data/tmp/*
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/

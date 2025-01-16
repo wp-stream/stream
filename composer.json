@@ -12,8 +12,9 @@
   ],
   "require": {
     "php": ">=7.0",
+    "ext-json": "*",
     "composer/installers": "~1.0",
-    "ext-json": "*"
+    "woocommerce/action-scheduler": "^3.8"
   },
   "require-dev": {
     "automattic/vipwpcs": "^3.0",
@@ -29,10 +30,14 @@
     "wp-coding-standards/wpcs": "^3.1",
     "wp-phpunit/wp-phpunit": "^6.6",
     "wpackagist-plugin/advanced-custom-fields": "6.3.4",
+    "wpackagist-plugin/buddypress": "14.0.0",
+    "wpackagist-plugin/classic-editor": "1.6.4",
     "wpackagist-plugin/easy-digital-downloads": "3.3.1",
     "wpackagist-plugin/jetpack": "13.6",
+    "wpackagist-plugin/two-factor": "0.9.1",
     "wpackagist-plugin/user-switching": "1.8.0",
-    "wpackagist-plugin/wordpress-seo": "23.1",
+    "wpackagist-plugin/wordpress-seo": "23.6",
+    "wpackagist-plugin/wp-crontrol": "1.17.0",
     "wpackagist-theme/twentytwentythree": "^1.0",
     "xwp/wait-for": "^0.0.1",
     "yoast/phpunit-polyfills": "^1.1"
@@ -53,6 +58,7 @@
     "wordpress-install-dir": "local/public/wp",
     "installer-paths": {
       "local/public/wp-content/themes/{$name}": ["type:wordpress-theme"],
+      "vendor/{$vendor}/{$name}/": ["woocommerce/action-scheduler"],
       "local/public/wp-content/plugins/{$name}": ["type:wordpress-plugin"],
       "local/public/wp-content/mu-plugins/{$name}": ["type:wordpress-muplugin"]
     }

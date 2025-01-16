@@ -149,7 +149,7 @@ class Author {
 
 		if ( 0 === $this->id ) {
 			$stream = wp_stream_get_instance();
-			$url    = $stream->locations['url'] . 'ui/stream-icons/wp-cli.png';
+			$url    = $stream->locations['url'] . 'assets/wp-cli.png';
 			$avatar = sprintf( '<img alt="%1$s" src="%2$s" class="avatar avatar-%3$s photo" height="%3$s" width="%3$s">', esc_attr( $this->get_display_name() ), esc_url( $url ), esc_attr( $size ) );
 		} elseif ( $this->is_deleted() && isset( $this->meta['user_email'] ) ) {
 				$email  = $this->meta['user_email'];

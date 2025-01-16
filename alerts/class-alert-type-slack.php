@@ -171,7 +171,7 @@ class Alert_Type_Slack extends Alert_Type {
 				$data['icon_url'] = $options['icon'];
 			}
 		}
-		wp_remote_post(
+		wp_safe_remote_post(
 			$options['webhook'],
 			array(
 				'body'    => wp_json_encode( $data ),

@@ -396,8 +396,8 @@ class Connector_Woocommerce extends Connector {
 			$action = 'updated';
 		}
 
-		$order           = new \WC_Order( $post->ID );
-		$order_title     = esc_html__( 'Order number', 'stream' ) . ' ' . esc_html( $order->get_order_number() );
+		$order_id        = \WC_Order_Factory::get_order_id( $post->ID );
+		$order_title     = esc_html__( 'Order number', 'stream' ) . ' ' . esc_html( $order_id );
 		$order_type_name = esc_html__( 'order', 'stream' );
 
 		$this->log(
@@ -437,8 +437,8 @@ class Connector_Woocommerce extends Connector {
 			return;
 		}
 
-		$order           = new \WC_Order( $post->ID );
-		$order_title     = esc_html__( 'Order number', 'stream' ) . ' ' . esc_html( $order->get_order_number() );
+		$order_id        = \WC_Order_Factory::get_order_id( $post->ID );
+		$order_title     = esc_html__( 'Order number', 'stream' ) . ' ' . esc_html( $order_id );
 		$order_type_name = esc_html__( 'order', 'stream' );
 
 		$this->log(
@@ -495,8 +495,8 @@ class Connector_Woocommerce extends Connector {
 			'stream'
 		);
 
-		$order           = new \WC_Order( $order_id );
-		$order_title     = esc_html__( 'Order number', 'stream' ) . ' ' . esc_html( $order->get_order_number() );
+		$order_id        = \WC_Order_Factory::get_order( $order_id );
+		$order_title     = esc_html__( 'Order number', 'stream' ) . ' ' . esc_html( $order_id );
 		$order_type_name = esc_html__( 'order', 'stream' );
 
 		$this->log(
@@ -619,14 +619,16 @@ class Connector_Woocommerce extends Connector {
 	 * @param array $tax_rate     Tax Rate data.
 	 */
 	public function callback_woocommerce_tax_rate_updated( $tax_rate_id, $tax_rate ) {
+		$tax_rate_label = \WC_Tax::get_rate_label( $tax_rate_id );
+
 		$this->log(
-			/* translators: %4$s: a tax rate name (e.g. "GST") */
+			/* translators: %s: a tax rate name (e.g. "GST") */
 			_x(
-				'"%4$s" tax rate updated',
+				'"%s" tax rate updated',
 				'Tax rate name',
 				'stream'
 			),
-			$tax_rate,
+			array( $tax_rate_label ),
 			$tax_rate_id,
 			'tax',
 			'updated'

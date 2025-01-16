@@ -107,19 +107,3 @@ function wp_stream_is_vip() {
 function wp_stream_is_cron_enabled() {
 	return ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) ? false : true;
 }
-
-/**
- * Get the asset min suffix if defined.
- *
- * @return string
- */
-function wp_stream_min_suffix() {
-	$min                 = '';
-	$is_script_debugging = ! defined( 'SCRIPT_DEBUG' ) || false === SCRIPT_DEBUG;
-
-	if ( apply_filters( 'wp_stream_load_min_assets', $is_script_debugging ) ) {
-		$min = 'min.';
-	}
-
-	return $min;
-}

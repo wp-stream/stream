@@ -10,6 +10,17 @@
 
 			// This is done with JS instead of CSS to override the inline styles added by Select2's JS.
 			$( '.select2-container', '.inline-edit-col' ).css( { width: '100%' } );
+
+			// Re-enable the select all functionality
+			$( '.wp-list-table thead .check-column input[type="checkbox"]' ).on(
+				'click',
+				function() {
+					$( this )
+						.parents( '.wp-list-table' )
+						.find( 'tbody .check-column input[type="checkbox"]' )
+						.click();
+				}
+			);
 		}
 	);
 }( jQuery ) );

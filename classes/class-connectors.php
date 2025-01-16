@@ -93,10 +93,14 @@ class Connectors {
 			'gravityforms',
 			'jetpack',
 			'mercator',
+			'two-factor',
 			'user-switching',
 			'woocommerce',
 			'wordpress-seo',
 		);
+
+		// Get excluded connectors.
+		$excluded_connectors = array();
 
 		$classes = array();
 		foreach ( $connectors as $connector ) {
@@ -112,27 +116,8 @@ class Connectors {
 			}
 
 			// Initialize connector.
-			$class = new $class_name( $this->plugin->log );
-
-			// Check if the connector class extends WP_Stream\Connector.
-			if ( ! is_subclass_of( $class, 'WP_Stream\Connector' ) ) {
-				continue;
-			}
-
-			// Check if the connector events are allowed to be registered in the WP Admin.
-			if ( is_admin() && ! $class->register_admin ) {
-				continue;
-			}
-
-			// Check if the connector events are allowed to be registered in the WP Frontend.
-			if ( ! is_admin() && ! $class->register_frontend ) {
-				continue;
-			}
-
-			// Run any final validations the connector may have before used.
-			if ( $class->is_dependency_satisfied() ) {
-				$classes[ $class->name ] = $class;
-			}
+			$class                   = new $class_name();
+			$classes[ $class->name ] = $class;
 		}
 
 		/**
@@ -140,23 +125,28 @@ class Connectors {
 		 *
 		 * @param array $classes An array of Connector objects.
 		 */
-		$this->connectors = apply_filters( 'wp_stream_connectors', $classes );
+		$connector_classes = apply_filters( 'wp_stream_connectors', $classes );
 
-		if ( empty( $this->connectors ) ) {
-			return;
-		}
-
-		foreach ( $this->connectors as $connector ) {
-			if ( ! method_exists( $connector, 'get_label' ) ) {
+		foreach ( $connector_classes as $connector ) {
+			// Check if the connector class extends WP_Stream\Connector.
+			if ( ! is_subclass_of( $connector, 'WP_Stream\Connector' ) ) {
 				continue;
 			}
-			$this->term_labels['stream_connector'][ $connector->name ] = $connector->get_label();
-		}
 
-		// Get excluded connectors.
-		$excluded_connectors = array();
+			// Check if the connector events are allowed to be registered in the WP Admin.
+			if ( is_admin() && ! $connector->register_admin ) {
+				continue;
+			}
 
-		foreach ( $this->connectors as $connector ) {
+			// Check if the connector events are allowed to be registered in the WP Frontend.
+			if ( ! is_admin() && ! $connector->register_frontend ) {
+				continue;
+			}
+
+			// Run any final validations the connector may have before used.
+			if ( ! $connector->is_dependency_satisfied() ) {
+				continue;
+			}
 
 			// Register error for invalid any connector class.
 			if ( ! method_exists( $connector, 'get_label' ) ) {
@@ -180,21 +170,6 @@ class Connectors {
 				continue;
 			}
 
-			// Check if the connectors extends the Connector class, if not skip it.
-			if ( ! is_subclass_of( $connector, '\WP_Stream\Connector' ) ) {
-				/* translators: %s: connector class name, intended to provide help to developers (e.g. "Connector_BuddyPress") */
-				$this->plugin->admin->notice( sprintf( __( '%1$s class wasn\'t loaded because it doesn\'t extends the %2$s class.', 'stream' ), $connector->name, 'Connector' ), true );
-				continue;
-			}
-
-			// Store connector label.
-			if ( ! in_array( $connector->name, $this->term_labels['stream_connector'], true ) ) {
-				$this->term_labels['stream_connector'][ $connector->name ] = $connector->get_label();
-			}
-
-			$connector_name = $connector->name;
-			$is_excluded    = in_array( $connector_name, $excluded_connectors, true );
-
 			/**
 			 * Allows excluded connectors to be overridden and registered.
 			 *
@@ -202,16 +177,28 @@ class Connectors {
 			 * @param string $connector           The current connector's slug.
 			 * @param array  $excluded_connectors An array of all excluded connector slugs.
 			 */
-			$is_excluded_connector = apply_filters( 'wp_stream_check_connector_is_excluded', $is_excluded, $connector_name, $excluded_connectors );
+			$is_excluded_connector = apply_filters(
+				'wp_stream_check_connector_is_excluded',
+				in_array( $connector->name, $excluded_connectors, true ),
+				$connector->name,
+				$excluded_connectors
+			);
 
 			if ( $is_excluded_connector ) {
 				continue;
 			}
 
+			// Add connector to the registry.
+			$this->connectors[ $connector->name ] = $connector;
+
+			// Register the connector.
 			$connector->register();
 
 			// Link context labels to their connector.
 			$this->contexts[ $connector->name ] = $connector->get_context_labels();
+
+			// Store connector label.
+			$this->term_labels['stream_connector'][ $connector->name ] = $connector->get_label();
 
 			// Add new terms to our label lookup array.
 			$this->term_labels['stream_action']  = array_merge(
@@ -229,8 +216,8 @@ class Connectors {
 		/**
 		 * Fires after all connectors have been registered.
 		 *
-		 * @param array      $labels     All register connectors labels array
-		 * @param Connectors $connectors The Connectors object
+		 * @param array      $labels            All register connectors labels array
+		 * @param Connectors $connector_classes The Connectors object
 		 */
 		do_action( 'wp_stream_after_connectors_registration', $labels, $this );
 	}

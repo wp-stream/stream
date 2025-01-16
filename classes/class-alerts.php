@@ -27,7 +27,7 @@ class Alerts {
 	/**
 	 * Capability required to access alerts.
 	 */
-	const CAPABILITY = 'manage_options';
+	const CAPABILITY = WP_STREAM_SETTINGS_CAPABILITY;
 
 	/**
 	 * Holds Instance of plugin object
@@ -306,33 +306,21 @@ class Alerts {
 	 */
 	public function register_scripts() {
 		$screen = get_current_screen();
-		if ( 'edit-wp_stream_alerts' === $screen->id ) {
-
-			$min = wp_stream_min_suffix();
-
-			wp_register_script(
-				'wp-stream-alerts',
-				$this->plugin->locations['url'] . 'ui/js/alerts.' . $min . 'js',
-				array(
-					'wp-stream-select2',
-					'jquery',
-					'inline-edit-post',
-				),
-				$this->plugin->get_version(),
-				false
-			);
-
-			wp_localize_script(
-				'wp-stream-alerts',
-				'streamAlerts',
-				array(
-					'any'        => __( 'Any', 'stream' ),
-					'anyContext' => __( 'Any Context', 'stream' ),
-				)
-			);
-			wp_enqueue_script( 'wp-stream-alerts' );
-			wp_enqueue_style( 'wp-stream-select2' );
+		if ( 'edit-wp_stream_alerts' !== $screen->id ) {
+			return;
 		}
+
+		$this->plugin->enqueue_asset(
+			'alerts',
+			array(
+				$this->plugin->with_select2(),
+				'inline-edit-post',
+			),
+			array(
+				'any'        => __( 'Any', 'stream' ),
+				'anyContext' => __( 'Any Context', 'stream' ),
+			)
+		);
 	}
 
 	/**
@@ -622,6 +610,24 @@ class Alerts {
 		echo '<label>' . esc_html__( 'Alert me when', 'stream' ) . '</label>';
 		$form->render_fields();
 		wp_nonce_field( 'save_alert', 'wp_stream_alerts_nonce' );
+
+		if ( $post instanceof \WP_Post ) :
+			/**
+			 * These fields are required for the post to be saved, as the Admin AJAX inline_save action is fired.
+			 *
+			 * @see get_inline_data()
+			 * @see wp_ajax_inline_save()
+			 */
+			?>
+			<input type="hidden" name="_status" value="<?php echo esc_attr( get_post_status( $post->ID ) ); ?>" />
+			<input type="hidden" name="jj" value="<?php echo esc_attr( mysql2date( 'd', $post->post_date, false ) ); ?>" />
+			<input type="hidden" name="mm" value="<?php echo esc_attr( mysql2date( 'm', $post->post_date, false ) ); ?>" />
+			<input type="hidden" name="aa" value="<?php echo esc_attr( mysql2date( 'Y', $post->post_date, false ) ); ?>" />
+			<input type="hidden" name="hh" value="<?php echo esc_attr( mysql2date( 'H', $post->post_date, false ) ); ?>" />
+			<input type="hidden" name="mn" value="<?php echo esc_attr( mysql2date( 'i', $post->post_date, false ) ); ?>" />
+			<input type="hidden" name="ss" value="<?php echo esc_attr( mysql2date( 's', $post->post_date, false ) ); ?>" />
+			<?php
+		endif;
 	}
 
 	/**

@@ -2,9 +2,10 @@
 .distignore
 .editorconfig
 .eslintignore
-.eslintrc.json
+.eslintrc.js
 .gitignore
 .nvmrc
+.phpunit.result.cache
 composer.lock
 docker-compose.build.yml
 docker-compose.yml
@@ -14,14 +15,24 @@ package-lock.json
 phpcs.xml.dist
 phpunit.xml
 phpunit-multisite.xml
+playwright.config.js
 renovate.json
 .git
 .github
 .idea
 .vscode
 .wordpress-org
-build
 dist
 local
 node_modules
 tests
+
+# Playwright generated files.
+/artifacts/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# JS and SCSS source files.
+/src/

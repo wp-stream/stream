@@ -146,18 +146,26 @@ abstract class Connector {
 	/**
 	 * Log handler
 	 *
-	 * @param string $message   sprintf-ready error message string.
-	 * @param array  $args      sprintf (and extra) arguments to use.
-	 * @param int    $object_id Target object id.
-	 * @param string $context   Context of the event.
-	 * @param string $action    Action of the event.
-	 * @param int    $user_id   User responsible for the event.
+	 * @param string   $message   sprintf-ready error message string.
+	 * @param array    $args      sprintf (and extra) arguments to use.
+	 * @param int|null $object_id Target object id (if any).
+	 * @param string   $context   Context of the event.
+	 * @param string   $action    Action of the event.
+	 * @param int      $user_id   User responsible for the event.
 	 *
 	 * @return bool
 	 */
 	public function log( $message, $args, $object_id, $context, $action, $user_id = null ) {
 		$connector = $this->name;
 
+		/**
+		 * Override the data logged. Returning false to this filter will stop the data from being logged.
+		 * Examples of this filter in use can be found in some of the custom connectors.
+		 *
+		 * @see Connector_ACF::log_override()
+		 *
+		 * @return array|false An array of the data to be logged or false if it should not be logged.
+		 */
 		$data = apply_filters(
 			'wp_stream_log_data',
 			compact( 'connector', 'message', 'args', 'object_id', 'context', 'action', 'user_id' )

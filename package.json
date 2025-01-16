@@ -6,7 +6,7 @@
   "author": "XWP",
   "license": "GPLv2+",
   "engines": {
-    "node": "^20"
+    "node": "^22.13.0"
   },
   "repository": {
     "type": "git",
@@ -19,36 +19,44 @@
   "keywords": [
     "wp",
     "stream",
-    "stream",
     "activity",
     "logs",
     "track"
   ],
   "devDependencies": {
-    "@wordpress/eslint-plugin": "^19.2.0",
-    "eslint": "^8.57.0",
-    "grunt": "^1.6.1",
-    "grunt-contrib-clean": "^2.0.1",
-    "grunt-contrib-cssmin": "^5.0.0",
-    "grunt-contrib-uglify": "^5.2.2",
-    "npm-run-all": "^4.1.5"
+    "@playwright/test": "^1.49.1",
+    "@types/node": "^22.10.7",
+    "@wordpress/e2e-test-utils-playwright": "^1.16.0",
+    "@wordpress/eslint-plugin": "^22.2.0",
+    "@wordpress/scripts": "^30.9.0",
+    "copy-webpack-plugin": "^12.0.2",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "jquery": "3.7.1",
+    "npm-run-all2": "^7.0.2",
+    "uuid": "^11.0.5"
   },
   "scripts": {
-    "build": "grunt",
+    "build": "wp-scripts build",
+    "dev": "wp-scripts start",
     "lint": "npm-run-all lint:*",
-    "lint:js": "eslint .",
+    "lint:js": "DEBUG=eslint:cli-engine wp-scripts lint-js",
     "lint:php": "composer lint",
     "lint:php-tests": "composer lint-tests",
-    "format": "composer format",
+    "format": "npm-run-all format:*",
+    "format:php": "composer format",
+    "format:js": "npm run lint:js -- --fix",
     "test": "npm-run-all test:*",
     "test:php": "npm run cli -- composer test --working-dir=wp-content/plugins/stream-src",
     "test:php-multisite": "npm run cli -- composer test-multisite --working-dir=wp-content/plugins/stream-src",
+    "test-e2e": "wp-scripts test-playwright",
+    "test-e2e-debug": "wp-scripts test-playwright --debug",
     "test-xdebug": "npm run cli -- composer test-xdebug --working-dir=wp-content/plugins/stream-src",
     "test-one": "npm run cli -- composer test-one --working-dir=wp-content/plugins/stream-src --",
     "test-report": "npm run cli -- composer test-report --working-dir=wp-content/plugins/stream-src",
     "build-containers": "docker compose --file docker-compose.build.yml build",
     "push-containers": "docker compose --file docker-compose.build.yml push",
     "start": "docker compose up --remove-orphans --detach",
+    "start-xdebug": "XDEBUG_TRIGGER=1 docker compose up --remove-orphans --detach",
     "switch-to:php8.2": "docker compose build --build-arg PHP_VERSION=8.2 --build-arg XDEBUG_VERSION=3.3.2 && npm run start",
     "switch-to:php7.4": "docker compose build && npm run start",
     "which-php": "npm run cli -- php --version",
@@ -57,6 +65,13 @@
     "stop-all": "docker stop $(docker ps -a -q)",
     "logs": "docker compose logs --follow",
     "cli": "docker compose run --rm --user $(id -u) wordpress --",
+    "large-records-remove": "npm run cli -- /bin/sh -c  'mysql mysql -hmysql -uroot -ppassword < /var/local/scripts/large-datasets/remove-test-logs.sql'",
+    "large-records-generate": "npm run cli -- /bin/sh -c  'mysql mysql -hmysql -uroot -ppassword < /var/local/scripts/large-datasets/bulk-insert-logs.sql'",
+    "large-records-show": "npm run cli -- /bin/sh -c  'mysql mysql -hmysql -uroot -ppassword < /var/local/scripts/large-datasets/show-stream-db-stats.sql'",
     "install-wordpress": "npm run cli wp core multisite-install"
+  },
+  "dependencies": {
+    "select2": "^4.0.13",
+    "timeago": "^1.6.7"
   }
 }

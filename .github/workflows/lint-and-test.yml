@@ -54,11 +54,11 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Build
+        run: npm run build
+
       - name: Pull custom Docker images
         run: docker compose pull wordpress
 
       - name: Test
         run: npm run test
-
-      - name: Build
-        run: npm run build

@@ -27,7 +27,7 @@
 	</report>
 	</coverage>
 	<php>
-	<const name="WP_TEST_ACTIVATED_PLUGINS" value="advanced-custom-fields/acf.php,easy-digital-downloads/easy-digital-downloads.php,jetpack/jetpack.php,user-switching/user-switching.php"/>
+	<const name="WP_TEST_ACTIVATED_PLUGINS" value="advanced-custom-fields/acf.php,easy-digital-downloads/easy-digital-downloads.php,jetpack/jetpack.php,user-switching/user-switching.php,two-factor/two-factor.php"/>
 	</php>
 	<testsuites>
 	<testsuite name="stream">

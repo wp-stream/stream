@@ -223,15 +223,7 @@ class Connector_WordPress_SEO extends Connector {
 	 */
 	public function admin_enqueue_scripts( $hook ) {
 		if ( 0 === strpos( $hook, 'seo_page_' ) ) {
-			$stream = wp_stream_get_instance();
-			$src    = $stream->locations['url'] . '/ui/js/wpseo-admin.js';
-			wp_enqueue_script(
-				'stream-connector-wpseo',
-				$src,
-				array( 'jquery' ),
-				$stream->get_version(),
-				false
-			);
+			wp_stream_get_instance()->enqueue_asset( 'wpseo-admin' );
 		}
 	}
 
@@ -393,7 +385,9 @@ class Connector_WordPress_SEO extends Connector {
 	private function meta( $object_id, $meta_key, $meta_value ) {
 		$prefix = \WPSEO_Meta::$meta_prefix;
 
-		\WPSEO_Metabox::translate_meta_boxes();
+		if ( defined( 'WPSEO_VERSION' ) && version_compare( WPSEO_VERSION, '23.5', '<' ) ) {
+			\WPSEO_Metabox::translate_meta_boxes();
+		}
 
 		if ( 0 !== strpos( $meta_key, $prefix ) ) {
 			return;
@@ -413,15 +407,18 @@ class Connector_WordPress_SEO extends Connector {
 		}
 
 		$post            = get_post( $object_id );
-		$post_type_label = get_post_type_labels( get_post_type_object( $post->post_type ) )->singular_name;
+		$post_type_obj   = get_post_type_object( $post->post_type );
+		$post_type_label = is_object( $post_type_obj ) && isset( $post_type_obj->labels->singular_name )
+			? $post_type_obj->labels->singular_name
+			: $post->post_type;
 
 		$this->log(
 			sprintf(
 				/* translators: %1$s: a meta field title, %2$s: a post title, %3$s: a post type (e.g. "Description", "Hello World", "Post") */
 				__( 'Updated "%1$s" of "%2$s" %3$s', 'stream' ),
-				$this->escape_percentages( $field['title'] ),
-				$this->escape_percentages( $post->post_title ),
-				$this->escape_percentages( $post_type_label )
+				$this->escape_percentages( (string) $field['title'] ),
+				$this->escape_percentages( (string) $post->post_title ),
+				$this->escape_percentages( (string) $post_type_label )
 			),
 			array(
 				'meta_key'   => $meta_key,

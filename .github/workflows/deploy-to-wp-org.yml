@@ -7,10 +7,14 @@ on:
   # In case of a pre-release, the action will not commit to WP.org (dry-run). However, it will still
   # create a zip file and upload it to the release. Note that a pre-release (release candidate)
   # should not be changed to a release but rather a new release should be created.
+  #
+  # The "prereleased" type will not trigger for pre-releases published from draft releases, but
+  # the "published" type will trigger. Since we want a workflow to run when stable and pre-releases
+  # publish, we subscribe to "published" instead of "released" and "prereleased".
+  #
+  # See: https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#release
   release:
-    types:
-      - released
-      - prereleased
+    types: [ published ]
 
 jobs:
   lint_and_test:

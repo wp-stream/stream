@@ -358,7 +358,7 @@ class Settings {
 					array(
 						'name'    => 'delete_all_records',
 						'title'   => esc_html__( 'Reset Stream Database', 'stream' ),
-						'type'    => 'link',
+						'type'    => Admin::is_running_async_deletion() ? 'none' : 'link',
 						'href'    => add_query_arg(
 							array(
 								'action'                => 'wp_stream_reset',
@@ -367,7 +367,7 @@ class Settings {
 							admin_url( 'admin-ajax.php' )
 						),
 						'class'   => 'warning',
-						'desc'    => esc_html__( 'Warning: This will delete all activity records from the database.', 'stream' ),
+						'desc'    => esc_html( $this->get_deletion_warning() ),
 						'default' => 0,
 						'sticky'  => 'bottom',
 					),
@@ -469,6 +469,35 @@ class Settings {
 		}
 
 		return (array) $defaults;
+	}
+
+	/**
+	 * Retrieves the deletion warning message based on the site type
+	 * and whether or not there is currently a process running to delete the tables.
+	 *
+	 * @return string The deletion warning message.
+	 */
+	public function get_deletion_warning(): string {
+
+		// Check if there is an action scheduler event running already deleting things.
+		if ( Admin::is_running_async_deletion() ) {
+
+			$warning = __( 'Currently deleting records. Please be patient, this can take a while.', 'stream' );
+
+		} elseif ( $this->plugin->is_multisite_network_activated() ) {
+
+			$warning = __( 'Warning: This will delete all activity records from the database for all sites.', 'stream' );
+
+		} elseif ( $this->plugin->is_multisite_not_network_activated() ) {
+
+			$warning = __( 'Warning: This will delete all activity records from the database for this site.', 'stream' );
+
+		} else {
+
+			$warning = __( 'Warning: This will delete all activity records from the database.', 'stream' );
+		}
+
+		return $warning;
 	}
 
 	/**

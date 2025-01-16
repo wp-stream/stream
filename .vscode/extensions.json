@@ -2,6 +2,6 @@
   "recommendations": [
     "EditorConfig.EditorConfig",
     "felixfbecker.php-debug",
-    "ikappas.phpcs"
+    "ms-playwright.playwright"
   ]
 }
